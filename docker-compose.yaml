@@ -1,0 +1,28 @@
+version: '3.9'
+services:
+  app:
+    image: go-orm-example:0.0.1
+    build:
+      context: .
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:9-alpine3.15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-orm_example}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-q", "-d", "orm_example", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer:4
+    ports:
+      - 1000:8080
